@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model animal {
+  id                 Int                  @id @default(autoincrement())
+  nome               String               @db.VarChar(50)
+  especie            String               @db.VarChar(20)
+  idade              String               @db.VarChar(10)
+  porte              String               @db.VarChar(10)
+  raca               String               @db.VarChar(20)
+  descricao          String?              @db.VarChar(200)
+  situacao           String               @db.VarChar(20)
+  foto_path          String?              @db.VarChar(100)
+  ong_id             Int
+  ong                ong                  @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal_ong1")
+  solicitacao_adocao solicitacao_adocao[]
+
+  @@index([ong_id], map: "fk_animal_ong1_idx")
+}
+
+model colaborador {
+  usuario_id Int
+  ong_id     Int
+  situacao   String  @db.VarChar(20)
+  ong        ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_ong1")
+  usuario    usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_usuario")
+
+  @@id([usuario_id, ong_id])
+  @@index([ong_id], map: "fk_usuario_has_ong_ong1_idx")
+  @@index([usuario_id], map: "fk_usuario_has_ong_usuario_idx")
+}
+
+model denuncia {
+  id           Int     @default(autoincrement())
+  usuario_id   Int
+  ong_id       Int
+  mensagem     String  @db.VarChar(200)
+  arquivo_path String  @db.VarChar(100)
+  ong          ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_ong2")
+  usuario      usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_usuario1")
+
+  @@id([id, usuario_id, ong_id])
+  @@index([ong_id], map: "fk_usuario_has_ong_ong2_idx")
+  @@index([usuario_id], map: "fk_usuario_has_ong_usuario1_idx")
+}
+
+model ong {
+  id                  Int                   @id @default(autoincrement())
+  nome_fantasia       String                @db.VarChar(50)
+  cnpj                String                @db.VarChar(18)
+  email               String                @db.VarChar(45)
+  telefone            String                @db.VarChar(15)
+  logradouro          String                @db.VarChar(45)
+  numero              String                @db.VarChar(10)
+  bairro              String                @db.VarChar(45)
+  cep                 String                @db.VarChar(9)
+  uf                  String                @db.VarChar(2)
+  descricao           String?               @db.VarChar(200)
+  situacao            String                @db.VarChar(20)
+  logo_path           String?               @db.VarChar(100)
+  usuario_id          Int
+  animal              animal[]
+  colaborador         colaborador[]
+  denuncia            denuncia[]
+  usuario             usuario               @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ong_usuario1")
+  solicitacao_adocao  solicitacao_adocao[]
+  solicitacao_resgate solicitacao_resgate[]
+
+  @@index([usuario_id], map: "fk_ong_usuario1_idx")
+}
+
+model solicitacao_adocao {
+  usuario_id      Int
+  animal_id       Int
+  ong_id          Int
+  telefone        String   @db.VarChar(14)
+  data_nascimento DateTime @db.Date
+  possui_animais  String   @db.Char(1)
+  motivo          String   @db.VarChar(200)
+  situacao        String   @db.VarChar(45)
+  animal          animal   @relation(fields: [animal_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_animal1")
+  ong             ong      @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_ong1")
+  usuario         usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_usuario1")
+
+  @@id([usuario_id, animal_id, ong_id])
+  @@index([animal_id], map: "fk_usuario_has_animal_animal1_idx")
+  @@index([ong_id], map: "fk_usuario_has_animal_ong1_idx")
+  @@index([usuario_id], map: "fk_usuario_has_animal_usuario1_idx")
+}
+
+model solicitacao_resgate {
+  id                    Int     @default(autoincrement())
+  descricao             String  @db.VarChar(200)
+  especie               String  @db.VarChar(20)
+  logradouro_aproximado String  @db.VarChar(45)
+  numero_aproximado     String  @db.VarChar(10)
+  bairro                String  @db.VarChar(45)
+  cidade                String  @db.VarChar(45)
+  cep                   String  @db.VarChar(9)
+  uf                    String  @db.VarChar(2)
+  ponto_referencia      String  @db.VarChar(45)
+  situacao              String  @db.Char(1)
+  usuario_id            Int
+  ong_id                Int
+  ong                   ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_ong1")
+  usuario               usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_usuario1")
+
+  @@id([id, usuario_id])
+  @@index([ong_id], map: "fk_solicitacao_resgate_ong1_idx")
+  @@index([usuario_id], map: "fk_solicitacao_resgate_usuario1_idx")
+}
+
+model usuario {
+  id                  Int                   @id @default(autoincrement())
+  nome                String                @db.VarChar(70)
+  cpf                 String                @unique(map: "cpf_UNIQUE") @db.VarChar(14)
+  telefone            String                @db.VarChar(15)
+  logradouro          String                @db.VarChar(45)
+  numero              String                @db.VarChar(10)
+  bairro              String                @db.VarChar(45)
+  cidade              String                @db.VarChar(45)
+  cep                 String                @db.VarChar(9)
+  uf                  String                @db.VarChar(2)
+  email               String                @unique(map: "email_UNIQUE") @db.VarChar(45)
+  senha               String                @db.VarChar(45)
+  nivel               String                @db.VarChar(20)
+  imagem_path         String?               @db.VarChar(100)
+  situacao            String                @db.Char(1)
+  colaborador         colaborador[]
+  denuncia            denuncia[]
+  ong                 ong[]
+  solicitacao_adocao  solicitacao_adocao[]
+  solicitacao_resgate solicitacao_resgate[]
+}
