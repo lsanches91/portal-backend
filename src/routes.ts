@@ -5,6 +5,7 @@ import { GetAllUsuario } from "./controllers/usuarioController/GetAllUsuario";
 import { GetUsuarioById } from "./controllers/usuarioController/GetUsuarioById";
 import { UpdateUsuario } from "./controllers/usuarioController/UpdateUsuario";
 import { DeleteUsuario } from "./controllers/usuarioController/DeleteUsuario";
+import { LoginUsuario } from "./controllers/usuarioController/LoginUsuario";
 
 //Imports Ong
 import { CreateOng } from "./controllers/ongController/CreateOng";
@@ -47,6 +48,7 @@ import { GetAllAdocao } from "./controllers/adocaoController/GetAllAdocao";
 import { GetAdocaoById } from "./controllers/adocaoController/GetAdocaoById";
 import { UpdateAdocao } from "./controllers/adocaoController/UpdateAdocao";
 import { DeleteAdocao } from "./controllers/adocaoController/DeleteAdocao";
+import { authMiddleware } from "./middlewares/authMiddleware";
 
 const routes = Router();
 
@@ -56,12 +58,15 @@ const getAllUsuario = new GetAllUsuario();
 const getUsuarioById = new GetUsuarioById();
 const updateUsuario = new UpdateUsuario();
 const deleteUsuario = new DeleteUsuario();
+const loginUsuario = new LoginUsuario();
 
 routes.post("/usuario", createUsuario.handle);
-routes.get("/usuarios", getAllUsuario.handle);
-routes.get("/usuario/:id", getUsuarioById.handle);
-routes.put("/usuario/:id", updateUsuario.handle);
-routes.delete("/usuario/:id", deleteUsuario.handle);
+routes.post("/login", loginUsuario.handle);
+routes.get("/profile", authMiddleware, loginUsuario.getProfile);
+routes.get("/usuarios", authMiddleware,getAllUsuario.handle);
+routes.get("/usuario/:id", authMiddleware, getUsuarioById.handle);
+routes.put("/usuario/:id", authMiddleware, updateUsuario.handle);
+routes.delete("/usuario/:id", authMiddleware, deleteUsuario.handle);
 
 //Rotas Ong
 const createOng = new CreateOng();

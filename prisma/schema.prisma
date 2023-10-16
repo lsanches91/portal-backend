@@ -16,7 +16,7 @@ model animal {
   raca               String               @db.VarChar(20)
   descricao          String?              @db.VarChar(200)
   situacao           String               @db.VarChar(20)
-  foto_path          String?              @db.VarChar(100)
+  foto_path          String?              @db.VarChar(500)
   ong_id             Int
   ong                ong                  @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal_ong1")
   solicitacao_adocao solicitacao_adocao[]
@@ -63,7 +63,7 @@ model ong {
   uf                  String                @db.VarChar(2)
   descricao           String?               @db.VarChar(200)
   situacao            String                @db.VarChar(20)
-  logo_path           String?               @db.VarChar(100)
+  logo_path           String?               @db.VarChar(500)
   usuario_id          Int
   animal              animal[]
   colaborador         colaborador[]
@@ -128,9 +128,9 @@ model usuario {
   cep                 String                @db.VarChar(9)
   uf                  String                @db.VarChar(2)
   email               String                @unique(map: "email_UNIQUE") @db.VarChar(45)
-  senha               String                @db.VarChar(45)
+  senha               String                @db.VarChar(100)
   nivel               String                @db.VarChar(20)
-  imagem_path         String?               @db.VarChar(100)
+  imagem_path         String?               @db.VarChar(500)
   situacao            String                @db.Char(1)
   colaborador         colaborador[]
   denuncia            denuncia[]
