@@ -3,7 +3,8 @@ import { prismaClient } from "../../database/prismaClient";
 
 export class GetOngById {
   async handle(request: Request, response: Response) {
-    const idSearch = parseInt(request.params.id);
+    try{
+      const idSearch = parseInt(request.params.id);
     
     const ong = await prismaClient.ong.findUnique({
         where:{
@@ -11,9 +12,19 @@ export class GetOngById {
         },
         include: {
           animal: true,
+          cidade: {
+            include: {
+              estado: true
+            }
+          }
         },
     })
 
     return response.json(ong);
+
+    }catch(erro){
+    console.log(erro);
+    response.status(500).json({ error: "Erro ao buscar ONG pelo ID." });
+    }    
   }
 }

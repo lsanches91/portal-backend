@@ -8,25 +8,27 @@ type JwtPayload = {
 }
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const {authorization} = req.headers
-        if(!authorization){
-            return res.status(401); 
-        }
+    const { authorization } = req.headers
+    if (!authorization) {
+        return res.status(401);
+    }
 
-        const token = authorization.split(" ")[1];
+    const token = authorization.split(" ")[1];
+    try {
         const { id } = jwt.verify(token, process.env.JWT_PASS ?? "") as JwtPayload
 
         const usuario = await prismaClient.usuario.findUnique({
-            where:{
-                id:id
+            where: {
+                id: id
             }
         })
 
-        if(!usuario){
+        if (!usuario) {
             return res.status(401);
         }
 
-        const {senha:_, ...usuarioLogado} = usuario;
-
         next()
+    } catch (error) {
+        return res.status(401).json({ error: "Não foi possivel válidar o Token, realize o login novamente." });
+    }
 }

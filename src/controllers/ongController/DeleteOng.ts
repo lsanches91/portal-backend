@@ -3,7 +3,8 @@ import { prismaClient } from "../../database/prismaClient";
 
 export class DeleteOng {
   async handle(request: Request, response: Response) {
-    const idSearch = parseInt(request.params.id);
+    try{
+      const idSearch = parseInt(request.params.id);
     
     const ong = await prismaClient.ong.delete({
         where: {
@@ -12,5 +13,10 @@ export class DeleteOng {
     })
 
     return response.json(ong);
+
+    }catch(erro){
+    console.log(erro);
+    response.status(500).json({ error: "Erro ao deletar ONG." });
+    }    
   }
 }

@@ -3,21 +3,30 @@ import { prismaClient } from "../../database/prismaClient";
 
 export class CreateColaborador {
   async handle(request: Request, response: Response) {
-    
-    const {
-      usuario_id,
-      ong_id,
-      situacao
-    } = request.body;
+    try {
+      const {
+        usuario_id,
+        ong_id,
+        situacao,
+        responsavel,
+        cargo
+      } = request.body;
 
-    const colaborador = await prismaClient.colaborador.create({
+      const colaborador = await prismaClient.colaborador.create({
         data: {
-            usuario_id,
-            ong_id,
-            situacao
+          usuario_id,
+          ong_id,
+          situacao,
+          responsavel,
+          cargo
         },
-    });
+      });
 
-    return response.json(colaborador);
+      return response.json(colaborador);
+
+    } catch (erro) {
+      console.log(erro);
+      response.status(500).json({ error: "Erro ao criar Colaborador." });
+    }
   }
 }

@@ -3,38 +3,43 @@ import { prismaClient } from "../../database/prismaClient";
 
 export class UpdateAnimal {
   async handle(request: Request, response: Response) {
-    const idSearch = parseInt(request.params.id);
-    
-    const {
+    try {
+      const idSearch = parseInt(request.params.id);
+
+      const {
         nome,
-        especie,
         idade,
         porte,
-        raca,
         descricao,
         situacao,
         foto_path,
-        ong_id
-    } = request.body;
-        
+        ong_id,
+        raca_id
+      } = request.body;
 
-    const animal = await prismaClient.animal.update({
+
+      const animal = await prismaClient.animal.update({
         where: {
-            id: idSearch
+          id: idSearch
         },
-        data: {            
-            nome,
-            especie,
-            idade,
-            porte,
-            raca,
-            descricao,
-            situacao,
-            foto_path,
-            ong_id 
+        data: {
+          nome,
+          idade,
+          porte,
+          descricao,
+          situacao,
+          foto_path,
+          ong_id: parseInt(ong_id),
+          raca_id: parseInt(raca_id)
         }
-    })
+      })
 
-    return response.json(animal);
+      return response.json(animal);
+
+    } catch (erro) {
+      console.log(erro);
+      response.status(500).json({ error: "Erro ao atualizar Animal." });
+    }
+
   }
 }

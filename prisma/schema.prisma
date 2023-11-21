@@ -10,26 +10,29 @@ datasource db {
 model animal {
   id                 Int                  @id @default(autoincrement())
   nome               String               @db.VarChar(50)
-  especie            String               @db.VarChar(20)
   idade              String               @db.VarChar(10)
   porte              String               @db.VarChar(10)
-  raca               String               @db.VarChar(20)
   descricao          String?              @db.VarChar(200)
   situacao           String               @db.VarChar(20)
   foto_path          String?              @db.VarChar(500)
   ong_id             Int
+  raca_id            Int
   ong                ong                  @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal_ong1")
+  raca               raca                 @relation(fields: [raca_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal_raca1")
   solicitacao_adocao solicitacao_adocao[]
 
   @@index([ong_id], map: "fk_animal_ong1_idx")
+  @@index([raca_id], map: "fk_animal_raca1_idx")
 }
 
 model colaborador {
-  usuario_id Int
-  ong_id     Int
-  situacao   String  @db.VarChar(20)
-  ong        ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_ong1")
-  usuario    usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_usuario")
+  usuario_id  Int
+  ong_id      Int
+  situacao    String  @db.VarChar(20)
+  cargo       String? @db.VarChar(20)
+  responsavel String  @db.VarChar(1)
+  ong         ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_ong1")
+  usuario     usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_usuario")
 
   @@id([usuario_id, ong_id])
   @@index([ong_id], map: "fk_usuario_has_ong_ong1_idx")
@@ -41,7 +44,7 @@ model denuncia {
   usuario_id   Int
   ong_id       Int
   mensagem     String  @db.VarChar(200)
-  arquivo_path String  @db.VarChar(100)
+  arquivo_path String? @db.VarChar(100)
   ong          ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_ong2")
   usuario      usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_ong_usuario1")
 
@@ -53,14 +56,14 @@ model denuncia {
 model ong {
   id                  Int                   @id @default(autoincrement())
   nome_fantasia       String                @db.VarChar(50)
-  cnpj                String                @db.VarChar(18)
+  cnpj                String                @unique(map: "cnpj_UNIQUE") @db.VarChar(18)
   email               String                @db.VarChar(45)
   telefone            String                @db.VarChar(15)
   logradouro          String                @db.VarChar(45)
   numero              String                @db.VarChar(10)
   bairro              String                @db.VarChar(45)
   cep                 String                @db.VarChar(9)
-  uf                  String                @db.VarChar(2)
+  cidade_id           Int
   descricao           String?               @db.VarChar(200)
   situacao            String                @db.VarChar(20)
   logo_path           String?               @db.VarChar(500)
@@ -71,24 +74,28 @@ model ong {
   usuario             usuario               @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ong_usuario1")
   solicitacao_adocao  solicitacao_adocao[]
   solicitacao_resgate solicitacao_resgate[]
+  cidade              cidade                @relation(fields: [cidade_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ong_cidade1")
 
   @@index([usuario_id], map: "fk_ong_usuario1_idx")
+  @@index([cidade_id], map: "fk_ong_cidade1_idx")
 }
 
 model solicitacao_adocao {
-  usuario_id      Int
-  animal_id       Int
-  ong_id          Int
-  telefone        String   @db.VarChar(14)
-  data_nascimento DateTime @db.Date
-  possui_animais  String   @db.Char(1)
-  motivo          String   @db.VarChar(200)
-  situacao        String   @db.VarChar(45)
-  animal          animal   @relation(fields: [animal_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_animal1")
-  ong             ong      @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_ong1")
-  usuario         usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_usuario1")
+  id             Int      @default(autoincrement())
+  usuario_id     Int
+  animal_id      Int
+  ong_id         Int
+  maior_idade    String   @db.Char(1)
+  possui_animais String   @db.Char(1)
+  motivo         String   @db.VarChar(200)
+  situacao       String   @db.Char(1)
+  data_criacao   DateTime
+  resposta       String?  @db.VarChar(200)
+  animal         animal   @relation(fields: [animal_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_animal1")
+  ong            ong      @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_ong1")
+  usuario        usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_has_animal_usuario1")
 
-  @@id([usuario_id, animal_id, ong_id])
+  @@id([id, usuario_id, animal_id, ong_id])
   @@index([animal_id], map: "fk_usuario_has_animal_animal1_idx")
   @@index([ong_id], map: "fk_usuario_has_animal_ong1_idx")
   @@index([usuario_id], map: "fk_usuario_has_animal_usuario1_idx")
@@ -100,20 +107,20 @@ model solicitacao_resgate {
   especie               String  @db.VarChar(20)
   logradouro_aproximado String  @db.VarChar(45)
   numero_aproximado     String  @db.VarChar(10)
-  bairro                String  @db.VarChar(45)
-  cidade                String  @db.VarChar(45)
+  cidade_id             Int
   cep                   String  @db.VarChar(9)
-  uf                    String  @db.VarChar(2)
   ponto_referencia      String  @db.VarChar(45)
   situacao              String  @db.Char(1)
   usuario_id            Int
-  ong_id                Int
-  ong                   ong     @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_ong1")
+  ong_id                Int?
+  ong                   ong?    @relation(fields: [ong_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_ong1")
   usuario               usuario @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_usuario1")
+  cidade                cidade  @relation(fields: [cidade_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitacao_resgate_cidade1")
 
   @@id([id, usuario_id])
   @@index([ong_id], map: "fk_solicitacao_resgate_ong1_idx")
   @@index([usuario_id], map: "fk_solicitacao_resgate_usuario1_idx")
+  @@index([cidade_id], map: "fk_solicitacao_resgate_cidade1_idx")
 }
 
 model usuario {
@@ -124,12 +131,11 @@ model usuario {
   logradouro          String                @db.VarChar(45)
   numero              String                @db.VarChar(10)
   bairro              String                @db.VarChar(45)
-  cidade              String                @db.VarChar(45)
+  cidade_id           Int
   cep                 String                @db.VarChar(9)
-  uf                  String                @db.VarChar(2)
   email               String                @unique(map: "email_UNIQUE") @db.VarChar(45)
   senha               String                @db.VarChar(100)
-  nivel               String                @db.VarChar(20)
+  nivel               String                @db.Char(1)
   imagem_path         String?               @db.VarChar(500)
   situacao            String                @db.Char(1)
   colaborador         colaborador[]
@@ -137,4 +143,45 @@ model usuario {
   ong                 ong[]
   solicitacao_adocao  solicitacao_adocao[]
   solicitacao_resgate solicitacao_resgate[]
+  cidade              cidade                @relation(fields: [cidade_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_cidade1")
+
+  @@index([cidade_id], map: "fk_usuario_cidade1_idx")
+}
+
+model especie {
+  id              Int     @id @default(autoincrement())
+  nome_comum      String  @unique(map: "nome_comum_UNIQUE") @db.VarChar(45)
+  nome_cientifico String  @unique(map: "nome_cientifico_UNIQUE") @db.VarChar(45)
+  situacao        String  @db.VarChar(20)
+  imagem_path     String? @db.VarChar(500)
+  raca            raca[]
+}
+
+model raca {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.VarChar(45)
+  situacao   String   @db.VarChar(20)
+  especie_id Int
+  animal     animal[]
+  especie    especie  @relation(fields: [especie_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_raca_especie1")
+
+  @@index([especie_id], map: "fk_raca_especie1_idx")
+}
+
+model estado {
+  sigla  String   @id @unique(map: "sigla_UNIQUE") @db.VarChar(3)
+  nome   String   @unique(map: "nome_UNIQUE") @db.VarChar(20)
+  cidade cidade[]
+}
+
+model cidade {
+  id                  Int                   @id @default(autoincrement())
+  nome                String                @db.VarChar(20)
+  estado_sigla        String
+  ong                 ong[]
+  usuario             usuario[]
+  estado              estado                @relation(fields: [estado_sigla], references: [sigla], onDelete: NoAction, onUpdate: NoAction, map: "fk_cidade_estado1")
+  solicitacao_resgate solicitacao_resgate[]
+
+  @@index([estado_sigla], map: "fk_cidade_estado1_idx")
 }
