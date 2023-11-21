@@ -9,7 +9,17 @@ export class CreateCidade {
                 estado_sigla
             } = request.body;
 
-            const cidade = await prismaClient.cidade.create({
+            let cidade = await prismaClient.cidade.findFirst({
+                where: {
+                    nome,
+                    estado_sigla
+                },
+            });
+            if(cidade){
+                return response.status(400).json({ error: "Essa cidade já existe." });
+            }
+
+            cidade = await prismaClient.cidade.create({
                 data: {
                     nome,
                     estado_sigla

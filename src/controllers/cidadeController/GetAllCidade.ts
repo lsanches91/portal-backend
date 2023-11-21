@@ -4,7 +4,11 @@ import { prismaClient } from "../../database/prismaClient";
 export class GetAllCidade {
   async handle(request: Request, response: Response) {
     try {
-      const cidades = await prismaClient.cidade.findMany()
+      const cidades = await prismaClient.cidade.findMany({
+        orderBy: {
+          nome: 'asc' // ou 'desc' para ordenação decrescente
+        }
+      })
 
       return response.json(cidades);
 

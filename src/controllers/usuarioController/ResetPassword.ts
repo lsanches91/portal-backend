@@ -18,7 +18,7 @@ export class ResetPassword {
             const token = jwt.sign({ id: usuario.id }, process.env.JWT_PASS ?? "", { expiresIn: '1h' })
             try {
                 sendEmail(usuario.email, "Redefinição de senha PAPA", "<h3>Olá! " + usuario.nome + ", clique no botão para realizar redefinição de sua senha no PAPA</h3><br/><a href='" + process.env.FRONTEND_URL + "/redefinir-senha/" + token + "'><button class='botao' style='border: solid 1px blue; border-radius: 5px; color: white; background-color: blue; padding: 10px;'><b>Redefinir Senha</b></button></a>")
-                return response.status(200);
+                return response.status(200).json({ msg: "Email de recuperação de senha enviado com sucesso." });
             } catch (err) {
                 return response.status(404).json({ error: "Erro ao enviar o e-mail: " + err });
             }

@@ -12,6 +12,9 @@ export class GetAllCidadeByEstado {
                 },
                 include: {
                     estado: true
+                },
+                orderBy: {
+                  nome: 'asc' // ou 'desc' para ordenação decrescente
                 }
             })
 
