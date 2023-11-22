@@ -7,7 +7,7 @@ import axios from 'axios';
 const INTERVALO_DE_TEMPO = 10 * 60 * 1000;
 
 function fazerRequisicao() {
-      axios.get('/ongs')
+      axios.get('https://backend-portal-y4f9.onrender.com/usuarios')
             .then(response => {
                   console.log('Requisição feita com sucesso!', response.data);
             })
